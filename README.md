@@ -236,3 +236,38 @@ Phase 2 Checklist:
 - [ ] Frontend `/crawler` page starts a crawl with configurable params
 - [ ] Frontend `/crawls/:id` page shows live progress, summary, URL table
 - [ ] Export JSON and Export CSV buttons work on completed crawls
+
+## ARM64 Deployment Notes
+
+All Docker images use multi-arch official base images that work on both x86_64 and ARM64:
+
+- **Backend**: `node:20-bookworm-slim` (Debian glibc — reliable Prisma engine support on ARM64)
+- **Frontend build**: `node:20-bookworm-slim`
+- **Frontend serve**: `nginx:alpine`
+- **Database**: `postgres:16-alpine`
+
+### Building on an ARM64 server
+
+```bash
+# Build natively on the ARM64 host (preferred)
+docker compose up --build -d
+```
+
+### Cross-building from x86_64 for ARM64
+
+```bash
+# Create a buildx builder (one time)
+docker buildx create --use --name multiarch
+
+# Build and load for ARM64
+docker buildx bake --set '*.platform=linux/arm64' --load
+
+# Or build individual services
+docker buildx build --platform linux/arm64 -t news-seo-backend ./backend
+docker buildx build --platform linux/arm64 -t news-seo-frontend ./frontend
+```
+
+Key points:
+- No `--platform=linux/amd64` pinning exists in any Dockerfile
+- Prisma generates the correct query engine binary for the host architecture at `npx prisma generate` time
+- `bookworm-slim` (Debian 12) uses glibc, which avoids musl/Alpine compatibility issues with native Node.js modules on ARM64

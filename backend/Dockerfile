@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:20-bookworm-slim AS build
 
 WORKDIR /app
 
@@ -14,9 +14,9 @@ RUN npx prisma generate
 RUN npx tsc
 
 # ---- Production ----
-FROM node:22-alpine
+FROM node:20-bookworm-slim
 
-RUN apk add --no-cache wget
+RUN apt-get update && apt-get install -y --no-install-recommends wget && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
