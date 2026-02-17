@@ -31,6 +31,7 @@ model CrawlRun {
 
   project    Project     @relation(fields: [projectId], references: [id])
   urlRecords UrlRecord[]
+  issueClusters IssueCluster[]
 
   @@map("crawl_runs")
 }
@@ -58,4 +59,23 @@ model UrlRecord {
 
   @@index([normalizedUrl])
   @@map("url_records")
+}
+
+model IssueCluster {
+  id               String   @id @default(uuid())
+  crawlRunId       String   @map("crawl_run_id")
+  templateGroup    String?  @map("template_group")
+  section          String?
+  issueCode        String   @map("issue_code")
+  affectedCount    Int      @map("affected_count")
+  sampleUrlsJson   Json     @map("sample_urls_json")
+  rootCauseHint    String   @map("root_cause_hint")
+  devFixSuggestion String   @map("dev_fix_suggestion")
+  validationSteps  String   @map("validation_steps")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  crawlRun         CrawlRun @relation(fields: [crawlRunId], references: [id])
+
+  @@index([crawlRunId])
+  @@map("issue_clusters")
 }

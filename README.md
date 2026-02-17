@@ -237,6 +237,31 @@ Phase 2 Checklist:
 - [ ] Frontend `/crawls/:id` page shows live progress, summary, URL table
 - [ ] Export JSON and Export CSV buttons work on completed crawls
 
+## Phase 3 Verification
+
+Phase 3 adds template clustering and a developer backlog engine. Test with:
+
+```bash
+# 1. Run a crawl first (Phase 2), then generate clusters from a completed crawl
+curl -X POST http://localhost:4000/api/crawls/<CRAWL_RUN_ID>/generate-clusters
+
+# 2. List clusters for a crawl run
+curl http://localhost:4000/api/crawls/<CRAWL_RUN_ID>/clusters
+```
+
+Phase 3 Checklist:
+
+- [ ] `POST /api/crawls/:id/generate-clusters` groups URL issues into clusters
+- [ ] Clusters are grouped by templateGroup + section + issueCode
+- [ ] Each cluster includes affectedCount, sampleUrls (up to 5), rootCauseHint, devFixSuggestion, validationSteps
+- [ ] Deterministic mappings for all 8 issue codes (no AI)
+- [ ] `GET /api/crawls/:id/clusters` returns clusters sorted by affectedCount desc
+- [ ] Generation is idempotent (re-running replaces previous clusters)
+- [ ] Frontend CrawlDetail has "Clusters" tab
+- [ ] "Generate Clusters" button triggers cluster generation
+- [ ] Cluster cards display issue code, template, section, affected count, sample URLs, dev fix steps
+- [ ] "Export Clusters JSON" button downloads cluster data
+
 ## ARM64 Deployment Notes
 
 All Docker images use multi-arch official base images that work on both x86_64 and ARM64:
