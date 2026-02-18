@@ -21,7 +21,7 @@ RUN npm run build
 # ---- Production ----
 FROM node:20-bookworm-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends wget \
+RUN apt-get update && apt-get install -y --no-install-recommends wget openssl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --gid 1001 appgroup \
