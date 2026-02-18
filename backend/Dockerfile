@@ -17,16 +17,25 @@ RUN npx tsc
 # ---- Production ----
 FROM node:20-bookworm-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends wget \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd --gid 1001 appgroup \
+    && useradd --uid 1001 --gid appgroup --shell /bin/false --create-home appuser
 
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 
-RUN npm install --omit=dev && npx prisma generate
+ENV NODE_ENV=production
+RUN npm ci --omit=dev && npx prisma generate
 
 COPY --from=builder /app/dist ./dist
+
+RUN chown -R appuser:appgroup /app
+
+USER appuser
 
 EXPOSE 3001
 
