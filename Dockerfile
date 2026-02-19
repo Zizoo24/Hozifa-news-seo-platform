@@ -46,4 +46,4 @@ USER appuser
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["sh", "-c", "export DATABASE_URL=\"${VAR_1}\" && npm start"]
