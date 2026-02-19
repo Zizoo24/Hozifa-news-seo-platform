@@ -16,7 +16,7 @@ COPY backend/tsconfig.json ./
 COPY backend/src ./src/
 
 RUN npx prisma generate
-RUN npm run build
+RUN npx tsc
 
 # ---- Production ----
 FROM node:20-bookworm-slim
