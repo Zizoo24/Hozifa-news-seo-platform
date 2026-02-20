@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "prisma generate && tsc",
+    "build": "npx prisma generate && npx tsc",
     "start": "prisma migrate deploy; node dist/index.js",
     "lint": "tsc --noEmit"
   },
