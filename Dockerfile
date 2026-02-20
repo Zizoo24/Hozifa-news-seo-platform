@@ -1,17 +1,49 @@
-FROM node:18.17.0 AS builder
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
-COPY . .
-RUN npm run build --workspace=backend
+# Root Dockerfile for Dublyo deployment (backend service)
+# ---- Builder ----
+FROM node:20-bookworm-slim AS builder
 
-FROM node:18.17.0-alpine AS production
 WORKDIR /app
-COPY --from=builder /app/backend/dist ./backend/dist
-COPY --from=builder /app/backend/package.json ./backend/
-COPY --from=builder /app/backend/node_modules ./backend/node_modules
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
+COPY backend/prisma ./backend/prisma/
+
+RUN npm ci --workspace=backend
+
+WORKDIR /app/backend
+
+COPY backend/tsconfig.json ./
+COPY backend/src ./src/
+
+RUN npx prisma generate
+RUN npx tsc
+
+# ---- Production ----
+FROM node:20-bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends wget openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd --gid 1001 appgroup \
+    && useradd --uid 1001 --gid appgroup --shell /bin/false --create-home appuser
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
+COPY backend/prisma ./backend/prisma/
+
+RUN npm ci --workspace=backend --omit=dev && \
+    cd backend && npx prisma generate
+
+WORKDIR /app/backend
+
+COPY --from=builder /app/backend/dist ./dist
+
+RUN chown -R appuser:appgroup /app
+
 USER appuser
-EXPOSE 4000
-CMD ["node", "./backend/dist/index.js"]
-HEALTHCHECK --interval=10s --timeout=5s --retries=3 CMD wget --no-verbose --tries=1 --spider http://localhost:4000/api/health || exit 1
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
