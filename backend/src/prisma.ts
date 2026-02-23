@@ -48,12 +48,4 @@ export async function disconnectPrisma(): Promise<void> {
     await prisma.$disconnect();
   }
 }
-const dbUrl = process.env.VAR_1 || process.env.DATABASE_URL;
 
-export const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: dbUrl,
-    },
-  },
-});
