@@ -65,7 +65,14 @@ USER appuser
 
 ENV NODE_ENV=production
 
+# Accept DATABASE_URL as build arg (some platforms inject env vars at build time)
+ARG DATABASE_URL
+ARG DIRECT_URL
+# Persist build args as runtime env vars (empty string if not provided)
+ENV DATABASE_URL=${DATABASE_URL}
+ENV DIRECT_URL=${DIRECT_URL}
+
 EXPOSE 3000
 
-# Map Dublyo VAR_1 to DATABASE_URL if needed, then run migrations + start
+# Fallback: also check VAR_1 at runtime for Dublyo compatibility
 CMD ["sh", "-c", "export DATABASE_URL=\"${DATABASE_URL:-$VAR_1}\"; export DIRECT_URL=\"${DIRECT_URL:-$DATABASE_URL}\"; if [ -n \"$DATABASE_URL\" ]; then npx prisma migrate deploy 2>/dev/null || true; fi && node dist/index.js"]
