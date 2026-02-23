@@ -68,4 +68,4 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 # Map Dublyo VAR_1 to DATABASE_URL if needed, then run migrations + start
-CMD ["sh", "-c", "export DATABASE_URL=\"${DATABASE_URL:-$VAR_1}\"; if [ -n \"$DATABASE_URL\" ]; then npx prisma migrate deploy 2>/dev/null || true; fi && node dist/index.js"]
+CMD ["sh", "-c", "export DATABASE_URL=\"${DATABASE_URL:-$VAR_1}\"; export DIRECT_URL=\"${DIRECT_URL:-$DATABASE_URL}\"; if [ -n \"$DATABASE_URL\" ]; then npx prisma migrate deploy 2>/dev/null || true; fi && node dist/index.js"]
