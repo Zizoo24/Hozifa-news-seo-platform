@@ -1,7 +1,7 @@
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: parseInt(process.env.PORT || "3000", 10),
-  databaseUrl: process.env.DATABASE_URL || "",
+  databaseUrl: process.env.DATABASE_URL || process.env.VAR_1 || "",
   authDisabled: process.env.AUTH_DISABLED === "true",
   corsOrigins: (process.env.CORS_ORIGINS || "")
     .split(",")
