@@ -67,7 +67,13 @@ async function start() {
     const ok = await checkDb();
     console.log(`Database: ${ok ? "connected" : "unreachable (will retry on requests)"}`);
   } else {
-    console.log("Database: skipped (DATABASE_URL not set)");
+    // Log which DB-related env vars exist to help debug Dublyo config
+    const dbVars = ["DATABASE_URL", "VAR_1", "POSTGRES_URL", "POSTGRES_CONNECTION_STRING", "DB_URL"]
+      .filter((k) => !!process.env[k])
+      .map((k) => `${k}=${process.env[k]!.slice(0, 12)}...`);
+    console.log(
+      `Database: skipped — no connection string found. Env vars present: ${dbVars.length ? dbVars.join(", ") : "NONE"}`,
+    );
   }
 
   const server = app.listen(env.port, "0.0.0.0", () => {
